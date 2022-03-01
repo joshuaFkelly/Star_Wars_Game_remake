@@ -1,0 +1,31 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+img {
+  width: 150px;
+  height: 150px;
+}
+.character {
+  text-align: center;
+}
+#characterSelect {
+  display: flex;
+  justify-content: space-evenly;
+  text-align: center;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+#arena {
+  display: flex;
+  justify-content: space-around;
+  height: 260px;
+  margin-top: 25px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
