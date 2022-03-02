@@ -1,47 +1,22 @@
 const characterSelect = document.getElementById('characterSelect');
-// Game Logic
-// User selects character by clicking desired card element
-// Selected card element is moved to User side of Arena
-// User must select another character to battle
-// User clicks opponent by clicking desired card element
-// Selected card element is moved to opponent side of Arena
-// Battle ensues when User clicks attack button
-// Each button click Users selected character will attack selected opponents health
-// Each button click Users selected character attack daamage increases by its base value
-// Each button click opponent counter attacks
-// Each counter attack damages Users selected characters health
-// If opponent dies, then User must select another opponent to attack, else game over
-// User selects new opponent by clicking on desired card elemenmt
-// If there are no more opponent to select, then User wins and game is over.
+const user = document.getElementById('user');
+const comp = document.getElementById('comp');
+const attackBtn = document.getElementById('attack');
+// // Game Logic
+// // User selects character by clicking desired card element
+// // Selected card element is moved to User side of Arena
+// // User must select another character to battle
+// // User clicks opponent by clicking desired card element
+// // Selected card element is moved to opponent side of Arena
+// // Battle ensues when User clicks attack button
+// // Each button click Users selected character will attack selected opponents health
+// // Each button click Users selected character attack daamage increases by its base value
+// // Each button click opponent counter attacks
+// // Each counter attack damages Users selected characters health
+// // If opponent dies, then User must select another opponent to attack, else game over
+// // User selects new opponent by clicking on desired card elemenmt
+// // If there are no more opponent to select, then User wins and game is over.
 
-// Data
-// all characters are created cards and pushed to availableCharacters
-// availableCharacters maps card to character select div
-// uses .map() and appendChild()
-const availableCharacters = [];
-// Characters whose totalHealth drops at or below 50
-// character is pushed to graveyard array
-// graveyard array is maps each card to graveyard div
-// uses .map() and appendChild()
-const graveyard = [];
-
-// User selected character and user selected opponent data will be set here
-// WIll probably need to be a constructor as well
-// const arena = {
-//   player: character,
-//   opponent: character,
-// };
-
-// Each character will be put inside a card html element containing these properties as inner elements
-// Constructs a card Object that i will use to popuate an HTML Card
-class Card {
-  constructor(id, title, image, stats) {
-    this.id = id;
-    this.title = title;
-    this.image = image;
-    this.stats = stats;
-  }
-}
 // List of characters array
 const allCharacters = [
   {
@@ -53,6 +28,7 @@ const allCharacters = [
       attackDamage: 8,
       counterAttackDamage: 12,
     },
+    inBattle: false,
   },
   {
     id: 1,
@@ -63,6 +39,7 @@ const allCharacters = [
       attackDamage: 10,
       counterAttackDamage: 10,
     },
+    inBattle: false,
   },
   {
     id: 2,
@@ -73,6 +50,7 @@ const allCharacters = [
       attackDamage: 4,
       counterAttackDamage: 15,
     },
+    inBattle: false,
   },
   {
     id: 3,
@@ -83,43 +61,90 @@ const allCharacters = [
       attackDamage: 5,
       counterAttackDamage: 10,
     },
+    inBattle: false,
   },
 ];
-// Need to figure out how to create cards and put appropriate data for each card
-// loop through allCharacters
-const createCard = (char, i) => {
-  const characterCard = new Card(i, char.name, char.image, char.stats);
-  return availableCharacters.push(characterCard);
-};
-// i think i need to rethink how i looping through my allCharacters array. this doesnt seem right
-// i want to create a card for every character in the array
-// is this the right way to do it tho?
-const characterCard = allCharacters.map(createCard);
-// Characters with 0 hp
-console.log(`Graveyard: ${graveyard}`);
-// Basically our characters DB
-console.log(`All Characters: ${allCharacters}`);
-// Characters that havent been selected yet
-// console.log(`Available Characters: ${availableCharacters}`);
 
-const populateCharacterSelect = availableCharacters.map((Card) => {
-  let id, image, stats, title;
-  ({ id, image, stats, title } = {
-    id: Card.id,
-    image: Card.image,
-    stats: Card.stats,
-    title: Card.title,
-  });
+// Each character will be put inside a card html element containing these properties as inner elements
+// Constructs a card Object that i will use to popuate an HTML Card
+class Card {
+  constructor(id, title, image, stats) {
+    this.id = id;
+    this.title = title;
+    this.image = image;
+    this.stats = stats;
+    this.inBattle = false;
+  }
+}
+
+// callback for creating cards for each element inside allCharacters array
+const createCard = (char, i) => {
+  const characterCard = new Card(
+    i,
+    char.name,
+    char.image,
+    char.stats,
+    char.inBattle
+  );
+  return characterCard;
+};
+
+// Maps through allCharacters and createsa new Card for each, saving them all to this characterCardsreference
+const characterCards = allCharacters.map(createCard);
+// console.log('Character Cards Array:', characterCards);
+const availableCharacters = [];
+
+// Create a Card Div for each character
+const cardElements = characterCards.map((Card) => {
+  // Create div element
   const cardDiv = document.createElement('div');
-  cardDiv.id = id;
-  cardDiv.innerHTML = `
-    <h1>${title}</h1>
-    <img src="${image}">
-  <div>
-    <p id="totalHealth">Total Health: ${stats.totalHealth}</p>
-    <p id="attackDamage">Atatck Damage: ${stats.attackDamage}</p>
-    <p id="counterAttaclDamage">Counter Attack Damage: ${stats.counterAttackDamage}</p>
-  </div>
+  // set id to card.id
+  cardDiv.id = Card.id;
+  // set class to character
+  cardDiv.className = 'character';
+  // create innerHtml
+  cardDiv.innerHTML = `     
+        <h2 class = "cardTitle"> ${Card.title}</h2>
+        <img class="image" src ="${Card.image}">
+        <div class = "stats">
+          <p class = "stat"> Health: ${Card.stats.totalHealth} </p>
+          <p class = "stat">  Attack Damage: ${Card.stats.attackDamage} </p>
+          <p class = "stat"> Counter Attack Damage: ${Card.stats.counterAttackDamage} </p>
+        </div>
   `;
-  return characterSelect.appendChild(cardDiv);
+  // Conditions for how to arrange card divs and card data
+  if (!Card.inBattle) {
+    availableCharacters.push(Card);
+    characterSelect.appendChild(cardDiv);
+  }
+
+  // Event listener to change organization of moving els in the dom and data inside objects/arrays
+  cardDiv.addEventListener('click', () => {
+    // Condiiton to prepare a card for battle! Only 2 characters allowed in the arena at a time!!
+    if (!Card.inBattle && arena.length < 2) {
+      // prepare for battle!!
+      Card.inBattle = true;
+      // Find clicked Card inside avaialable characters array
+      const index = availableCharacters.indexOf(Card);
+      // If a match is made...
+      if (index > -1) {
+        availableCharacters.splice(index, 1);
+        arena.push(Card);
+      }
+      // Select your character!!
+      if (!user.hasChildNodes()) {
+        user.appendChild(cardDiv);
+      }
+      // Select your opponent!!
+      else {
+        comp.appendChild(cardDiv);
+      }
+    }
+  });
+  return cardDiv;
+});
+
+const arena = [];
+attackBtn.addEventListener('click', () => {
+  console.log(arena);
 });
