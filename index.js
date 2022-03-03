@@ -2,6 +2,7 @@ const characterSelectDiv = document.getElementById('characterSelect');
 const userDiv = document.getElementById('user');
 const compDiv = document.getElementById('comp');
 const attackBtn = document.getElementById('attack');
+const graveyardDiv = document.getElementById('graveyard');
 // // Game Logic
 // // User selects character by clicking desired card element
 // // Selected card element is moved to User side of Arena
@@ -24,9 +25,9 @@ const allCharacters = [
     name: 'Obi-Wan Kenobi',
     image: './images/Obi-Wan Kenobi.jpg',
     stats: {
-      totalHealth: 150,
+      totalHealth: 185,
       attackDamage: 8,
-      counterAttackDamage: 12,
+      counterAttackDamage: 13,
     },
     inBattle: false,
   },
@@ -35,9 +36,9 @@ const allCharacters = [
     name: 'Anakin Skywalker',
     image: './images/Anakin Skywalker.jpg',
     stats: {
-      totalHealth: 175,
+      totalHealth: 195,
       attackDamage: 10,
-      counterAttackDamage: 10,
+      counterAttackDamage: 11,
     },
     inBattle: false,
   },
@@ -46,9 +47,9 @@ const allCharacters = [
     name: 'Darth Maul',
     image: './images/Darth Maul.jpg',
     stats: {
-      totalHealth: 125,
-      attackDamage: 4,
-      counterAttackDamage: 15,
+      totalHealth: 190,
+      attackDamage: 9,
+      counterAttackDamage: 12,
     },
     inBattle: false,
   },
@@ -57,9 +58,9 @@ const allCharacters = [
     name: 'Darth Sidious',
     image: './images/Darth Sidious.jpg',
     stats: {
-      totalHealth: 100,
+      totalHealth: 180,
       attackDamage: 5,
-      counterAttackDamage: 10,
+      counterAttackDamage: 14,
     },
     inBattle: false,
   },
@@ -108,9 +109,9 @@ const createCardELem = (Card) => {
         <h2 class = "cardTitle"> ${Card.title}</h2>
         <img class="image" src ="${Card.image}">
         <div class = "stats">
-          <p class = "stat"> Health: ${Card.stats.totalHealth} </p>
-          <p class = "stat">  Attack Damage: ${Card.stats.attackDamage} </p>
-          <p class = "stat"> Counter Attack Damage: ${Card.stats.counterAttackDamage} </p>
+          <p id = "${Card.id}Health" class = "stat"> Health: ${Card.stats.totalHealth} </p>
+          <p id = "${Card.id}AtackDamage" class = "stat">  Attack Damage: ${Card.stats.attackDamage} </p>
+          <p id = "${Card.id}CounterAttackDamage" class = "stat"> Counter Attack Damage: ${Card.stats.counterAttackDamage} </p>
         </div>
   `;
   // Conditions for how to arrange card divs and card data
@@ -155,45 +156,48 @@ const arena = [];
 const attackLogic = () => {
   const user = arena[0];
   const comp = arena[1];
-  // Destructure user/comp object
-  ({
-    userId,
-    userAttackDamage,
-    userTotalHealth,
-    compCounterAttackDamage,
-    compTotalHealth,
-  } = {
-    userId: user.id,
-    userAttackDamage: user.stats.attackDamage,
-    userTotalHealth: user.stats.totalHealth,
-    compCounterAttackDamage: comp.stats.counterAttackDamage,
-    compTotalHealth: comp.stats.totalHealth,
-  });
-  // console.log(arena);
-  // console.log('User Attack: ', userAttackDamage);
-  // console.log('User Total Health: ', userTotalHealth);
-  // console.log('Comp Counter Attack: ', compCounterAttackDamage);
-  // console.log('Comp Total Health: ', compTotalHealth);
-  // console.log(arena);
-  // console.log(characterCards);
-  // console.log(userId);
-  const userIndex = characterCards.indexOf(arena[0]);
-  const compIndex = characterCards.indexOf(arena[1]);
+
+  // Helps find the character in the arena that matches the one from character card
+  const userIndex = characterCards.indexOf(user);
+  const compIndex = characterCards.indexOf(comp);
 
   // on click user attacks comp
   characterCards[compIndex].stats.totalHealth =
-    compTotalHealth - userAttackDamage;
-  console.log(characterCards[compIndex].stats.totalHealth);
+    characterCards[compIndex].stats.totalHealth -
+    characterCards[userIndex].stats.attackDamage;
 
   // comp counter attacks
   characterCards[userIndex].stats.totalHealth =
-    userTotalHealth - compCounterAttackDamage;
-  console.log(characterCards[userIndex].stats.totalHealth);
+    characterCards[userIndex].stats.totalHealth -
+    characterCards[compIndex].stats.counterAttackDamage;
 
+  const userHealthDiv = document.getElementById(`${userIndex}Health`);
+  userHealthDiv.innerText = `Health: ${characterCards[userIndex].stats.totalHealth}`;
+
+  const compHealthDiv = document.getElementById(`${compIndex}Health`);
+  compHealthDiv.innerText = `Health: ${characterCards[compIndex].stats.totalHealth}`;
   // if userTotalHealth <= 0 gameOver
+  if (characterCards[userIndex].stats.totalHealth <= 0) {
+    gameOver();
+  }
   // if compTotalHealth <= 0 move comp to graveyard, user selects another opponent
+  if (characterCards[compIndex].stats.totalHealth <= 0) {
+    arena.pop();
+    graveyardDiv.appendChild(cardElements[compIndex]);
+  }
+  if (availableCharacters.length === 0) {
+    gameOver();
+  }
   // if available characters array length is === 0 user wins, display game over menu
+  console.log(characterCards[userIndex].stats.attackDamage);
+  characterCards[userIndex].stats.attackDamage += 5;
+  console.log(characterCards[userIndex].stats.attackDamage);
+  console.log(user.stats.attackDamage);
 };
-const attack = (health, attackDmg) => health - attackDmg;
+
+// game over function
+const gameOver = () => {
+  console.log('You Lose');
+};
 // Attack button event listener
 attackBtn.addEventListener('click', attackLogic);
