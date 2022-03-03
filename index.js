@@ -1,6 +1,6 @@
-const characterSelect = document.getElementById('characterSelect');
-const user = document.getElementById('user');
-const comp = document.getElementById('comp');
+const characterSelectDiv = document.getElementById('characterSelect');
+const userDiv = document.getElementById('user');
+const compDiv = document.getElementById('comp');
 const attackBtn = document.getElementById('attack');
 // // Game Logic
 // // User selects character by clicking desired card element
@@ -89,13 +89,14 @@ const createCard = (char, i) => {
   return characterCard;
 };
 
-// Maps through allCharacters and createsa new Card for each, saving them all to this characterCardsreference
-const characterCards = allCharacters.map(createCard);
 // console.log('Character Cards Array:', characterCards);
 const availableCharacters = [];
 
+// Maps through allCharacters and createsa new Card for each, saving them all to this characterCardsreference
+const characterCards = allCharacters.map(createCard);
+
 // Create a Card Div for each character
-const cardElements = characterCards.map((Card) => {
+const createCardELem = (Card) => {
   // Create div element
   const cardDiv = document.createElement('div');
   // set id to card.id
@@ -115,7 +116,7 @@ const cardElements = characterCards.map((Card) => {
   // Conditions for how to arrange card divs and card data
   if (!Card.inBattle) {
     availableCharacters.push(Card);
-    characterSelect.appendChild(cardDiv);
+    characterSelectDiv.appendChild(cardDiv);
   }
 
   // Event listener to change organization of moving els in the dom and data inside objects/arrays
@@ -132,19 +133,67 @@ const cardElements = characterCards.map((Card) => {
         arena.push(Card);
       }
       // Select your character!!
-      if (!user.hasChildNodes()) {
-        user.appendChild(cardDiv);
+      if (!userDiv.hasChildNodes()) {
+        userDiv.appendChild(cardDiv);
       }
       // Select your opponent!!
       else {
-        comp.appendChild(cardDiv);
+        compDiv.appendChild(cardDiv);
       }
     }
   });
   return cardDiv;
-});
+};
 
+// Array of all character cards made in to Elements
+const cardElements = characterCards.map(createCardELem);
+
+// Arena array is declared but empty. Filled with cards that clicked on by user
 const arena = [];
-attackBtn.addEventListener('click', () => {
-  console.log(arena);
-});
+
+// Callback to attack button event listener
+const attackLogic = () => {
+  const user = arena[0];
+  const comp = arena[1];
+  // Destructure user/comp object
+  ({
+    userId,
+    userAttackDamage,
+    userTotalHealth,
+    compCounterAttackDamage,
+    compTotalHealth,
+  } = {
+    userId: user.id,
+    userAttackDamage: user.stats.attackDamage,
+    userTotalHealth: user.stats.totalHealth,
+    compCounterAttackDamage: comp.stats.counterAttackDamage,
+    compTotalHealth: comp.stats.totalHealth,
+  });
+  // console.log(arena);
+  // console.log('User Attack: ', userAttackDamage);
+  // console.log('User Total Health: ', userTotalHealth);
+  // console.log('Comp Counter Attack: ', compCounterAttackDamage);
+  // console.log('Comp Total Health: ', compTotalHealth);
+  // console.log(arena);
+  // console.log(characterCards);
+  // console.log(userId);
+  const userIndex = characterCards.indexOf(arena[0]);
+  const compIndex = characterCards.indexOf(arena[1]);
+
+  // on click user attacks comp
+  characterCards[compIndex].stats.totalHealth =
+    compTotalHealth - userAttackDamage;
+  console.log(characterCards[compIndex].stats.totalHealth);
+
+  // comp counter attacks
+  characterCards[userIndex].stats.totalHealth =
+    userTotalHealth - compCounterAttackDamage;
+  console.log(characterCards[userIndex].stats.totalHealth);
+
+  // if userTotalHealth <= 0 gameOver
+  // if compTotalHealth <= 0 move comp to graveyard, user selects another opponent
+  // if available characters array length is === 0 user wins, display game over menu
+};
+const attack = (health, attackDmg) => health - attackDmg;
+// Attack button event listener
+attackBtn.addEventListener('click', attackLogic);
