@@ -178,26 +178,34 @@ const attackLogic = () => {
   compHealthDiv.innerText = `Health: ${characterCards[compIndex].stats.totalHealth}`;
   // if userTotalHealth <= 0 gameOver
   if (characterCards[userIndex].stats.totalHealth <= 0) {
-    gameOver();
+    loseGameOver();
   }
   // if compTotalHealth <= 0 move comp to graveyard, user selects another opponent
   if (characterCards[compIndex].stats.totalHealth <= 0) {
     arena.pop();
     graveyardDiv.appendChild(cardElements[compIndex]);
+
+    graveyard.push(comp);
   }
-  if (availableCharacters.length === 0) {
-    gameOver();
+  if (
+    availableCharacters.length === 0 &&
+    graveyard.length === 3 &&
+    characterCards[userIndex].stats.totalHealth > 0
+  ) {
+    winGameOver();
   }
   // if available characters array length is === 0 user wins, display game over menu
-  console.log(characterCards[userIndex].stats.attackDamage);
   characterCards[userIndex].stats.attackDamage += 5;
-  console.log(characterCards[userIndex].stats.attackDamage);
-  console.log(user.stats.attackDamage);
 };
 
+const graveyard = [];
+
 // game over function
-const gameOver = () => {
-  console.log('You Lose');
+const loseGameOver = () => {
+  alert('You Lose');
+};
+const winGameOver = () => {
+  alert('You Win');
 };
 // Attack button event listener
 attackBtn.addEventListener('click', attackLogic);
