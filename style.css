@@ -3,13 +3,12 @@
   margin: 0;
   padding: 0;
 }
-.image {
+.cardImage {
   width: 150px;
   height: 150px;
 }
-.character {
+.characterCard {
   text-align: center;
-  width: 250px;
   border: 5px solid black;
   background-color: burlywood;
   padding: 5px;
